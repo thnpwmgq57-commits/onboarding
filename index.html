@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding TI — Faculté de l'Éducation | uOttawa</title>
+<style>
+  :root {
+    --uO-red: #8F001A;
+    --uO-red-mid: #b8002a;
+    --uO-red-light: #f9eaed;
+    --uO-red-border: #e5b3bc;
+    --text-primary: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #888;
+    --border: #e0e0e0;
+    --bg: #f5f4f2;
+    --white: #fff;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 620px; margin: 0 auto; }
+
+  /* Header */
+  .header { background: var(--uO-red); border-radius: var(--radius-lg); padding: 2rem 1.75rem 1.75rem; margin-bottom: 1.5rem; color: #fff; }
+  .header-logo { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.6rem; }
+  .header p { font-size: 0.875rem; opacity: 0.9; line-height: 1.65; margin-bottom: 0.6rem; }
+  .header-budget { margin-top: 1rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: var(--radius); padding: 0.9rem 1rem; font-size: 0.8125rem; line-height: 1.6; }
+  .header-budget strong { display: block; margin-bottom: 0.3rem; font-size: 0.875rem; }
+
+  /* Progress */
+  .progress-wrap { margin-bottom: 1.25rem; }
+  .progress-bar { display: flex; gap: 5px; margin-bottom: 0.4rem; }
+  .progress-seg { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+  .progress-seg.done { background: #b04060; }
+  .progress-seg.active { background: var(--uO-red); }
+  .progress-label { font-size: 12px; color: var(--text-muted); }
+
+  /* Cards */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .card-sub { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 1.1rem; line-height: 1.5; }
+
+  /* Fields */
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+  .field-grid.full { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 500; }
+  .field input { height: 38px; border: 1px solid var(--border); border-radius: var(--radius); padding: 0 12px; font-size: 0.875rem; color: var(--text-primary); background: var(--white); transition: border-color 0.15s, box-shadow 0.15s; font-family: inherit; }
+  .field input:focus { outline: none; border-color: var(--uO-red); box-shadow: 0 0 0 3px rgba(143,0,26,0.1); }
+
+  /* Lang selector page */
+  .lang-select-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 1rem 0; }
+  .lang-select-btn {
+    width: 100%; max-width: 340px; border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem; cursor: pointer; background: var(--white);
+    display: flex; align-items: center; gap: 16px;
+    transition: border-color 0.15s, background 0.15s; user-select: none;
+  }
+  .lang-select-btn:hover { border-color: var(--uO-red); background: var(--uO-red-light); }
+  .lang-select-icon { font-size: 2rem; flex-shrink: 0; }
+  .lang-select-name { font-size: 1.05rem; font-weight: 600; }
+  .lang-select-sub { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Config choices */
+  .config-choices { display: flex; flex-direction: column; gap: 12px; }
+  .config-choice { border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; background: var(--white); display: flex; align-items: flex-start; gap: 14px; }
+  .config-choice:hover { border-color: var(--uO-red); background: var(--uO-red-light); }
+  .config-choice.selected { border: 2px solid var(--uO-red); background: var(--uO-red-light); }
+  .config-choice-icon { font-size: 1.75rem; flex-shrink: 0; margin-top: 2px; }
+  .config-choice-body { flex: 1; }
+  .config-choice-name { font-size: 0.9375rem; font-weight: 600; margin-bottom: 3px; }
+  .config-choice-items { font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.6; }
+  .config-choice-badge { display: inline-block; font-size: 11px; font-weight: 600; background: var(--uO-red-light); color: var(--uO-red); border: 1px solid var(--uO-red-border); padding: 2px 8px; border-radius: 20px; margin-top: 6px; }
+  .config-choice.selected .config-choice-badge { background: var(--uO-red); color: #fff; border-color: var(--uO-red); }
+
+  /* Inline lang section */
+  .lang-section { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .lang-section.visible { display: block; }
+  .lang-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.5rem; }
+  .lang-choice { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; background: var(--white); }
+  .lang-choice:hover { border-color: var(--uO-red); background: var(--uO-red-light); }
+  .lang-choice.selected { border: 2px solid var(--uO-red); background: var(--uO-red-light); }
+  .lang-icon { font-size: 1.4rem; margin-bottom: 5px; }
+  .lang-name { font-size: 0.875rem; font-weight: 600; }
+  .lang-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px; }
+
+  /* Fond */
+  .fond-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fond-choice { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; background: var(--white); }
+  .fond-choice:hover { border-color: var(--uO-red); background: var(--uO-red-light); }
+  .fond-choice.selected { border: 2px solid var(--uO-red); background: var(--uO-red-light); }
+  .fond-choice-icon { font-size: 1.4rem; margin-bottom: 5px; }
+  .fond-choice-name { font-size: 0.875rem; font-weight: 600; }
+  .fond-choice-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px; line-height: 1.4; }
+
+  /* Checklist */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; background: var(--white); }
+  .check-item:hover { border-color: var(--uO-red); background: var(--uO-red-light); }
+  .check-item.checked { border: 2px solid var(--uO-red); background: var(--uO-red-light); }
+  .check-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+  .check-label { font-size: 0.875rem; font-weight: 500; flex: 1; }
+  .checkbox { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--white); transition: background 0.15s, border-color 0.15s; }
+  .check-item.checked .checkbox { background: var(--uO-red); border-color: var(--uO-red); }
+  .checkbox::after { content: ''; display: none; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); }
+  .check-item.checked .checkbox::after { display: block; }
+
+  textarea { width: 100%; min-height: 68px; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; font-size: 0.875rem; color: var(--text-primary); background: var(--white); resize: vertical; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; }
+  textarea:focus { outline: none; border-color: var(--uO-red); box-shadow: 0 0 0 3px rgba(143,0,26,0.1); }
+
+  /* Nav */
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; gap: 10px; }
+  .btn-prev { padding: 9px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; font-size: 0.875rem; cursor: pointer; color: var(--text-secondary); font-family: inherit; transition: background 0.15s; }
+  .btn-prev:hover { background: var(--bg); }
+  .btn-next { padding: 9px 24px; border: none; border-radius: var(--radius); background: var(--uO-red); color: #fff; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; margin-left: auto; transition: background 0.15s, transform 0.1s; }
+  .btn-next:hover { background: var(--uO-red-mid); }
+  .btn-next:active { transform: scale(0.98); }
+  .btn-next:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  .err { font-size: 0.75rem; color: var(--uO-red); margin-top: 8px; display: none; }
+
+  /* Summary */
+  .summary-row { margin-bottom: 0.85rem; }
+  .summary-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 4px; }
+  .summary-value { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+  .summary-sub { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0.85rem 0; }
+  .tag { display: inline-block; background: var(--uO-red-light); color: var(--uO-red); border: 1px solid var(--uO-red-border); font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin: 2px 3px 2px 0; }
+
+  .success-circle { width: 52px; height: 52px; border-radius: 50%; background: var(--uO-red-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .step { display: none; }
+  .step.active { display: block; }
+  .sending-msg { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 10px; text-align: center; display: none; }
+
+  .info-box { background: #fffbea; border: 1px solid #f0d080; border-radius: var(--radius); padding: 0.85rem 1rem; font-size: 0.8125rem; color: #5a4800; line-height: 1.55; margin-top: 1rem; }
+  .info-box strong { display: block; margin-bottom: 0.25rem; }
+
+  .fade-in { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 480px) {
+    .field-grid { grid-template-columns: 1fr; }
+    .fond-choices { grid-template-columns: 1fr; }
+    .lang-choices { grid-template-columns: 1fr; }
+    .lang-select-btn { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header" id="main-header">
+    <div class="header-logo" id="h-logo">Université d'Ottawa · Faculté de l'Éducation</div>
+    <p id="h-intro"></p>
+    <div class="header-budget" id="h-budget-box" style="display:none;">
+      <strong id="h-budget-title"></strong>
+      <span id="h-budget-body"></span>
+    </div>
+  </div>
+
+  <!-- Progress (masquée sur step-lang) -->
+  <div class="progress-wrap" id="progress-wrap" style="display:none;">
+    <div class="progress-bar">
+      <div class="progress-seg active" id="seg0"></div>
+      <div class="progress-seg" id="seg1"></div>
+      <div class="progress-seg" id="seg2"></div>
+    </div>
+    <div class="progress-label" id="prog-label"></div>
+  </div>
+
+  <!-- ========== STEP LANG: Sélection de langue ========== -->
+  <div class="step active" id="step-lang">
+    <div class="card" style="text-align:center; padding:2rem 1.5rem;">
+      <div style="font-size:1rem; font-weight:600; margin-bottom:0.25rem;">Choisissez votre langue</div>
+      <div style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:1.5rem;">Please select your language</div>
+      <div class="lang-select-wrap">
+        <div class="lang-select-btn" onclick="setLang('fr')">
+          <div class="lang-select-icon">🇨🇦</div>
+          <div>
+            <div class="lang-select-name">Français</div>
+            <div class="lang-select-sub">Remplir le formulaire en français</div>
+          </div>
+        </div>
+        <div class="lang-select-btn" onclick="setLang('en')">
+          <div class="lang-select-icon">🇬🇧</div>
+          <div>
+            <div class="lang-select-name">English</div>
+            <div class="lang-select-sub">Fill out the form in English</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== STEP 0: Infos ========== -->
+  <div class="step" id="step0">
+    <div class="card">
+      <div class="card-sub" id="s0-sub" style="margin-bottom:1rem;"></div>
+      <div class="field-grid">
+        <div class="field"><label id="lbl-prenom"></label><input type="text" id="f-prenom" placeholder="Marie"></div>
+        <div class="field"><label id="lbl-nom"></label><input type="text" id="f-nom" placeholder="Tremblay"></div>
+      </div>
+      <div class="field-grid full">
+        <div class="field"><label id="lbl-email"></label><input type="email" id="f-email" placeholder="mtremblay@uottawa.ca"></div>
+      </div>
+      <p class="err" id="err0"></p>
+    </div>
+    <div class="nav">
+      <button class="btn-next" id="btn-next0" onclick="goNext(0)"></button>
+    </div>
+  </div>
+
+  <!-- ========== STEP 1: Config + Langue inline + Fond ========== -->
+  <div class="step" id="step1">
+    <div class="card">
+      <div class="card-title" id="s1-config-title"></div>
+      <div class="card-sub" id="s1-config-sub"></div>
+      <div class="config-choices">
+
+        <div class="config-choice" data-group="config" data-val="Dell Pro 14 + Écran Dell 27 pouces" onclick="selectConfig(this)">
+          <div class="config-choice-icon">💻🖥️</div>
+          <div class="config-choice-body">
+            <div class="config-choice-name">Dell Pro 14 + Écran Dell 27"</div>
+            <div class="config-choice-items" id="spec-dell">
+              · Processeur : Intel® Core™ Ultra 5 235U vPro<br>
+              · Mémoire : 16 Go &nbsp;·&nbsp; Stockage : 512 Go<br>
+              · Écran Dell 27 pouces inclus<br>
+              · Environnement Windows corporatif uOttawa
+            </div>
+            <span class="config-choice-badge" id="badge-dell"></span>
+          </div>
+        </div>
+
+        <div class="config-choice" data-group="config" data-val="MacBook Air 13 pouces" onclick="selectConfig(this)">
+          <div class="config-choice-icon">🍎</div>
+          <div class="config-choice-body">
+            <div class="config-choice-name">MacBook Air 13"</div>
+            <div class="config-choice-items" id="spec-mac">
+              · Processeur : CPU 10 cœurs, GPU 8 cœurs, Neural Engine 16 cœurs<br>
+              · Mémoire : 16 Go &nbsp;·&nbsp; Stockage : 512 Go<br>
+              · Léger et compact — excellente autonomie<br>
+              · Sans écran additionnel (dans le budget alloué)
+            </div>
+            <span class="config-choice-badge" id="badge-mac"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- OS + Clavier inline -->
+      <div class="lang-section" id="lang-section">
+        <div class="card-title" id="s1-os-title" style="margin-bottom:0.25rem;"></div>
+        <div class="card-sub" id="s1-os-sub"></div>
+        <div class="lang-choices">
+          <div class="lang-choice" data-group="langue-os" data-val="Français (Canada)" onclick="selectLangOS(this)">
+            <div class="lang-icon">🇨🇦</div>
+            <div class="lang-name" id="os-fr-name"></div>
+            <div class="lang-desc" id="os-fr-desc"></div>
+          </div>
+          <div class="lang-choice" data-group="langue-os" data-val="English" onclick="selectLangOS(this)">
+            <div class="lang-icon">🇬🇧</div>
+            <div class="lang-name" id="os-en-name"></div>
+            <div class="lang-desc" id="os-en-desc"></div>
+          </div>
+        </div>
+        <p class="err" id="err-langue-os"></p>
+
+        <div class="card-title" id="s1-kbd-title" style="margin-bottom:0.25rem; margin-top:1.1rem;"></div>
+        <div class="card-sub" id="s1-kbd-sub"></div>
+        <div class="lang-choices">
+          <div class="lang-choice" data-group="langue-clavier" data-val="Français (Canada) — QWERTY" onclick="selectLangClavier(this)">
+            <div class="lang-icon">⌨️</div>
+            <div class="lang-name" id="kbd-fr-name"></div>
+            <div class="lang-desc" id="kbd-fr-desc"></div>
+          </div>
+          <div class="lang-choice" data-group="langue-clavier" data-val="English — QWERTY" onclick="selectLangClavier(this)">
+            <div class="lang-icon">⌨️</div>
+            <div class="lang-name" id="kbd-en-name"></div>
+            <div class="lang-desc" id="kbd-en-desc"></div>
+          </div>
+        </div>
+        <p class="err" id="err-langue-clavier"></p>
+      </div>
+
+      <p class="err" id="err1"></p>
+    </div>
+
+    <!-- Fond de dépenses -->
+    <div class="card">
+      <div class="card-title" id="s1-fond-title"></div>
+      <div class="card-sub" id="s1-fond-sub"></div>
+      <div class="fond-choices">
+        <div class="fond-choice" data-val="Oui" onclick="selectFond(this)">
+          <div class="fond-choice-icon">✅</div>
+          <div class="fond-choice-name" id="fond-oui-name"></div>
+          <div class="fond-choice-desc" id="fond-oui-desc"></div>
+        </div>
+        <div class="fond-choice" data-val="Plus tard" onclick="selectFond(this)">
+          <div class="fond-choice-icon">🕐</div>
+          <div class="fond-choice-name" id="fond-later-name"></div>
+          <div class="fond-choice-desc" id="fond-later-desc"></div>
+        </div>
+      </div>
+      <div class="info-box"><strong id="fond-info-title"></strong><span id="fond-info-body"></span></div>
+      <p class="err" id="err1b"></p>
+    </div>
+
+    <div class="nav">
+      <button class="btn-prev" id="btn-prev1" onclick="goPrev(1)"></button>
+      <button class="btn-next" id="btn-next1" onclick="goNext(1)"></button>
+    </div>
+  </div>
+
+  <!-- ========== STEP 2: Périphériques ========== -->
+  <div class="step" id="step2">
+    <div class="card">
+      <div class="card-title" id="s2-title"></div>
+      <div class="card-sub" id="s2-sub"></div>
+      <div class="checklist">
+        <div class="check-item" data-val="Casque audio" onclick="toggleCheck(this)">
+          <span class="check-icon">🎧</span><span class="check-label" id="p-casque"></span><div class="checkbox"></div>
+        </div>
+        <div class="check-item" data-val="Webcam externe" onclick="toggleCheck(this)">
+          <span class="check-icon">📷</span><span class="check-label" id="p-webcam"></span><div class="checkbox"></div>
+        </div>
+        <div class="check-item" data-val="Station d'accueil (dock)" onclick="toggleCheck(this)">
+          <span class="check-icon">🔌</span><span class="check-label" id="p-dock"></span><div class="checkbox"></div>
+        </div>
+        <div class="check-item" data-val="Écran additionnel" onclick="toggleCheck(this)">
+          <span class="check-icon">🖥️</span><span class="check-label" id="p-ecran"></span><div class="checkbox"></div>
+        </div>
+        <div class="check-item" data-val="Clavier externe" onclick="toggleCheck(this)">
+          <span class="check-icon">⌨️</span><span class="check-label" id="p-clavier"></span><div class="checkbox"></div>
+        </div>
+        <div class="check-item" data-val="Souris externe" onclick="toggleCheck(this)">
+          <span class="check-icon">🖱️</span><span class="check-label" id="p-souris"></span><div class="checkbox"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:-0.5rem;">
+      <div class="card-title" id="s2-other-title" style="font-size:0.875rem; margin-bottom:8px;"></div>
+      <textarea id="f-autre"></textarea>
+    </div>
+    <div class="nav">
+      <button class="btn-prev" id="btn-prev2" onclick="goPrev(2)"></button>
+      <button class="btn-next" id="btn-next2" onclick="goNext(2)"></button>
+    </div>
+  </div>
+
+  <!-- ========== STEP 3: Résumé ========== -->
+  <div class="step" id="step3">
+    <div class="card" style="text-align:center; padding:2rem 1.5rem 1.5rem;">
+      <div class="success-circle">📋</div>
+      <div style="font-size:1.05rem; font-weight:600; margin-bottom:0.3rem;" id="summ-name"></div>
+      <div style="font-size:0.8125rem; color:var(--text-secondary);" id="summ-sub"></div>
+    </div>
+    <div class="card">
+      <div class="summary-row">
+        <div class="summary-label" id="sl-employe"></div>
+        <div class="summary-value" id="s-nom"></div>
+        <div class="summary-sub" id="s-email"></div>
+      </div>
+      <hr class="divider">
+      <div class="summary-row">
+        <div class="summary-label" id="sl-config"></div>
+        <div class="summary-value" id="s-config"></div>
+      </div>
+      <hr class="divider">
+      <div class="summary-row">
+        <div class="summary-label" id="sl-os"></div>
+        <div class="summary-value" id="s-langue-os"></div>
+      </div>
+      <hr class="divider">
+      <div class="summary-row">
+        <div class="summary-label" id="sl-kbd"></div>
+        <div class="summary-value" id="s-langue-clavier"></div>
+      </div>
+      <hr class="divider">
+      <div class="summary-row">
+        <div class="summary-label" id="sl-fond"></div>
+        <div class="summary-value" id="s-fond"></div>
+      </div>
+      <div id="s-periph-wrap" style="display:none;">
+        <hr class="divider">
+        <div class="summary-row">
+          <div class="summary-label" id="sl-periph"></div>
+          <div id="s-periph"></div>
+        </div>
+      </div>
+      <div id="s-autre-wrap" style="display:none;">
+        <hr class="divider">
+        <div class="summary-row">
+          <div class="summary-label" id="sl-autre"></div>
+          <div style="font-size:0.875rem;" id="s-autre"></div>
+        </div>
+      </div>
+    </div>
+    <p class="err" id="err-submit" style="margin-bottom:8px; text-align:center;"></p>
+    <div class="nav">
+      <button class="btn-prev" id="btn-prev3" onclick="goPrev(3)"></button>
+      <button class="btn-next" id="btn-submit" onclick="submitForm()"></button>
+    </div>
+    <p class="sending-msg" id="sending-msg"></p>
+  </div>
+
+  <!-- ========== STEP 4: Confirmation ========== -->
+  <div class="step" id="step4">
+    <div class="card" style="text-align:center; padding:2.5rem 1.5rem;">
+      <div class="success-circle" style="background:#e8f5e9; font-size:1.6rem;">✅</div>
+      <div style="font-size:1.1rem; font-weight:600; margin-bottom:0.5rem;" id="conf-title"></div>
+      <div style="font-size:0.875rem; color:var(--text-secondary); line-height:1.65; max-width:400px; margin:0 auto 1.25rem;" id="conf-body"></div>
+      <div style="font-size:12px; color:var(--text-muted);" id="s-ref"></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+// L'URL Power Automate (signée SAS) n'est PLUS dans le client : elle vit côté
+// serveur dans la fonction proxy (functions/api/submit.js), via une variable
+// d'environnement. Le formulaire envoie au proxy, même origine = aucun CORS.
+const SUBMIT_ENDPOINT = '/api/submit';
+
+// ─── State ─────────────────────────────────────────────────────────────────
+const state = { lang: null, config: null, langue_os: null, langue_clavier: null, fond: null, periph: [] };
+
+// ─── Traductions ────────────────────────────────────────────────────────────
+const T = {
+  fr: {
+    logo:            "Université d'Ottawa · Faculté de l'Éducation",
+    h_intro:         "Nous sommes ravis de vous accueillir à la Faculté de l'Éducation. Pour que votre matériel informatique soit prêt dès votre premier jour, veuillez remplir ce court formulaire — notre équipe TI s'occupera du reste.",
+    h_budget_title:  "💻 Votre équipement informatique",
+    h_budget_body:   "Un budget de 1 600 $ est alloué pour votre poste de travail. Deux configurations sont disponibles dans ce budget. Si vous souhaitez compléter votre équipement, vous pouvez utiliser votre fond de dépenses professionnel — ce choix peut être fait maintenant ou à tout moment en contactant l'équipe TI.",
+    prog:            ["Étape 1 sur 3 — Informations générales", "Étape 2 sur 3 — Configuration et fond de dépenses", "Étape 3 sur 3 — Périphériques supplémentaires", "Résumé — Vérifiez avant envoi"],
+    s0_sub:          "Ces informations seront transmises à l'équipe TI pour préparer votre accès.",
+    lbl_prenom:      "Prénom", lbl_nom: "Nom de famille", lbl_email: "Courriel",
+    err0:            "Veuillez remplir tous les champs avant de continuer.",
+    btn_next:        "Suivant →", btn_prev: "← Précédent", btn_summary: "Voir le résumé →", btn_submit: "📤 Soumettre la demande",
+    s1_config_title: "Votre configuration informatique",
+    s1_config_sub:   "Les deux options ci-dessous sont incluses dans le budget de 1 600 $ alloué par la Faculté.",
+    spec_dell:       "· Processeur : Intel® Core™ Ultra 5 235U vPro<br>· Mémoire : 16 Go &nbsp;·&nbsp; Stockage : 512 Go<br>· Écran Dell 27 pouces inclus<br>· Environnement Windows corporatif uOttawa",
+    spec_mac:        "· Processeur : CPU 10 cœurs, GPU 8 cœurs, Neural Engine 16 cœurs<br>· Mémoire : 16 Go &nbsp;·&nbsp; Stockage : 512 Go<br>· Léger et compact — excellente autonomie<br>· Sans écran additionnel (dans le budget alloué)",
+    badge:           "Inclus dans le budget",
+    err1:            "Veuillez sélectionner une configuration.",
+    s1_os_title:     "Langue du système d'exploitation (OS)",
+    s1_os_sub:       "La langue dans laquelle Windows ou macOS sera configuré.",
+    os_fr_name:      "Français (Canada)", os_fr_desc: "Interface système en français",
+    os_en_name:      "English",           os_en_desc: "System interface in English",
+    err_os:          "Veuillez sélectionner la langue de l'OS.",
+    s1_kbd_title:    "Disposition du clavier",
+    s1_kbd_sub:      "La disposition physique et logicielle de votre clavier.",
+    kbd_fr_name:     "Français (Canada)", kbd_fr_desc: "QWERTY canadien — touches accentuées",
+    kbd_en_name:     "English",           kbd_en_desc: "Standard QWERTY",
+    err_kbd:         "Veuillez sélectionner la disposition du clavier.",
+    s1_fond_title:   "Fond de dépenses professionnel",
+    s1_fond_sub:     "Souhaitez-vous utiliser votre fond de dépenses pour du matériel informatique supplémentaire ?",
+    fond_oui_name:   "Oui, je suis intéressé·e", fond_oui_desc: "L'équipe TI vous contactera pour les détails",
+    fond_later_name: "Plus tard",                 fond_later_desc: "Je ferai ce choix après mon arrivée",
+    fond_info_title: "ℹ️ Comment ça fonctionne ?",
+    fond_info_body:  "Votre fond de dépenses professionnel peut être utilisé pour des achats informatiques approuvés. Si vous choisissez « Oui », un membre de l'équipe TI vous contactera avant votre arrivée.",
+    err1b:           "Veuillez indiquer votre choix concernant le fond de dépenses.",
+    s2_title:        "Périphériques supplémentaires",
+    s2_sub:          "Sélectionnez les périphériques que vous souhaitez acquérir via votre fond de dépenses. Choix multiple permis.",
+    s2_other_title:  "Autre besoin spécifique",
+    f_autre_ph:      "Logiciel particulier, adaptateur, besoin d'accessibilité...",
+    p_casque:        "Casque audio", p_webcam: "Webcam externe", p_dock: "Station d'accueil (dock)",
+    p_ecran:         "Écran additionnel", p_clavier: "Clavier externe", p_souris: "Souris externe",
+    summ_sub:        "Confirmez les informations avant de soumettre à l'équipe TI.",
+    sl_employe:      "Employé·e", sl_config: "Configuration choisie", sl_os: "Langue de l'OS",
+    sl_kbd:          "Disposition du clavier", sl_fond: "Fond de dépenses professionnel",
+    sl_periph:       "Périphériques souhaités", sl_autre: "Autre",
+    none_selected:   "Aucun sélectionné",
+    sending:         "⏳ Envoi en cours...",
+    err_submit:      "Une erreur est survenue lors de l'envoi. Veuillez réessayer ou contacter educit@uottawa.ca",
+    btn_modify:      "← Modifier",
+    conf_title:      "Demande envoyée !",
+    conf_body:       "L'équipe TI de la Faculté de l'Éducation a bien reçu votre demande. Votre matériel sera prêt pour votre arrivée.<br><br>Pour toute question : <strong>educit@uottawa.ca</strong>",
+    ref_label:       "Référence : ",
+    merci:           "Merci, ",
+  },
+  en: {
+    logo:            "University of Ottawa · Faculty of Education",
+    h_intro:         "We are delighted to welcome you to the Faculty of Education. To ensure your IT equipment is ready from day one, please fill out this short form — our IT team will take care of the rest.",
+    h_budget_title:  "💻 Your IT equipment",
+    h_budget_body:   "A budget of $1,600 is allocated for your workstation. Two configurations are available within this budget. If you wish to complement your equipment, you may use your professional expense fund — this choice can be made now or at any time by contacting the IT team.",
+    prog:            ["Step 1 of 3 — General information", "Step 2 of 3 — Configuration and expense fund", "Step 3 of 3 — Additional peripherals", "Summary — Review before submitting"],
+    s0_sub:          "This information will be shared with the IT team to prepare your access.",
+    lbl_prenom:      "First name", lbl_nom: "Last name", lbl_email: "email",
+    err0:            "Please fill in all fields before continuing.",
+    btn_next:        "Next →", btn_prev: "← Previous", btn_summary: "View summary →", btn_submit: "📤 Submit request",
+    s1_config_title: "Your IT configuration",
+    s1_config_sub:   "Both options below are included within the $1,600 budget allocated by the Faculty.",
+    spec_dell:       "· Processor: Intel® Core™ Ultra 5 235U vPro<br>· Memory: 16 GB &nbsp;·&nbsp; Storage: 512 GB<br>· Dell 27\" monitor included<br>· Windows corporate environment (uOttawa)",
+    spec_mac:        "· Processor: 10-core CPU, 8-core GPU, 16-core Neural Engine<br>· Memory: 16 GB &nbsp;·&nbsp; Storage: 512 GB<br>· Light and compact — outstanding battery life<br>· No additional monitor (within allocated budget)",
+    badge:           "Included in budget",
+    err1:            "Please select a configuration.",
+    s1_os_title:     "Operating system (OS) language",
+    s1_os_sub:       "The language in which Windows or macOS will be configured.",
+    os_fr_name:      "French (Canada)", os_fr_desc: "System interface in French",
+    os_en_name:      "English",         os_en_desc: "System interface in English",
+    err_os:          "Please select an OS language.",
+    s1_kbd_title:    "Keyboard layout",
+    s1_kbd_sub:      "The physical and software layout of your keyboard.",
+    kbd_fr_name:     "French (Canada)", kbd_fr_desc: "Canadian QWERTY — accented keys",
+    kbd_en_name:     "English",         kbd_en_desc: "Standard QWERTY",
+    err_kbd:         "Please select a keyboard layout.",
+    s1_fond_title:   "Professional expense fund",
+    s1_fond_sub:     "Would you like to use your professional expense fund for additional IT equipment?",
+    fond_oui_name:   "Yes, I'm interested",  fond_oui_desc: "The IT team will contact you for details",
+    fond_later_name: "Later",                fond_later_desc: "I'll make this choice after I arrive",
+    fond_info_title: "ℹ️ How does it work?",
+    fond_info_body:  "Your professional expense fund can be used for approved IT purchases. If you choose \"Yes\", a member of the IT team will contact you before your start date.",
+    err1b:           "Please indicate your choice regarding the expense fund.",
+    s2_title:        "Additional peripherals",
+    s2_sub:          "Select the peripherals you wish to acquire through your professional expense fund. Multiple selections allowed.",
+    s2_other_title:  "Other specific needs",
+    f_autre_ph:      "Specific software, adapter, accessibility needs...",
+    p_casque:        "Headset", p_webcam: "External webcam", p_dock: "Docking station",
+    p_ecran:         "Additional monitor", p_clavier: "External keyboard", p_souris: "External mouse",
+    summ_sub:        "Please confirm the information before submitting to the IT team.",
+    sl_employe:      "Employee", sl_config: "Selected configuration", sl_os: "OS language",
+    sl_kbd:          "Keyboard layout", sl_fond: "Professional expense fund",
+    sl_periph:       "Requested peripherals", sl_autre: "Other",
+    none_selected:   "None selected",
+    sending:         "⏳ Sending...",
+    err_submit:      "An error occurred while submitting. Please try again or contact educit@uottawa.ca",
+    btn_modify:      "← Edit",
+    conf_title:      "Request submitted!",
+    conf_body:       "The IT team of the Faculty of Education has received your request. Your equipment will be ready for your arrival.<br><br>For any questions: <strong>educit@uottawa.ca</strong>",
+    ref_label:       "Reference: ",
+    merci:           "Thank you, ",
+  }
+};
+
+// ─── Appliquer les traductions ───────────────────────────────────────────────
+function applyTranslations() {
+  const t = T[state.lang];
+  document.documentElement.lang = state.lang;
+
+  // Header
+  document.getElementById('h-logo').textContent    = t.logo;
+  document.getElementById('h-intro').textContent   = t.h_intro;
+  document.getElementById('h-budget-title').textContent = t.h_budget_title;
+  document.getElementById('h-budget-body').textContent  = t.h_budget_body;
+  document.getElementById('h-budget-box').style.display = 'block';
+
+  // Step 0
+  document.getElementById('s0-sub').textContent    = t.s0_sub;
+  document.getElementById('lbl-prenom').textContent = t.lbl_prenom;
+  document.getElementById('lbl-nom').textContent    = t.lbl_nom;
+  document.getElementById('lbl-email').textContent  = t.lbl_email;
+  document.getElementById('err0').textContent       = t.err0;
+  document.getElementById('btn-next0').textContent  = t.btn_next;
+
+  // Step 1 — config
+  document.getElementById('s1-config-title').textContent = t.s1_config_title;
+  document.getElementById('s1-config-sub').textContent   = t.s1_config_sub;
+  document.getElementById('spec-dell').innerHTML = t.spec_dell;
+  document.getElementById('spec-mac').innerHTML  = t.spec_mac;
+  document.getElementById('badge-dell').textContent = t.badge;
+  document.getElementById('badge-mac').textContent  = t.badge;
+  document.getElementById('err1').textContent = t.err1;
+
+  // Step 1 — OS/clavier
+  document.getElementById('s1-os-title').textContent  = t.s1_os_title;
+  document.getElementById('s1-os-sub').textContent    = t.s1_os_sub;
+  document.getElementById('os-fr-name').textContent   = t.os_fr_name;
+  document.getElementById('os-fr-desc').textContent   = t.os_fr_desc;
+  document.getElementById('os-en-name').textContent   = t.os_en_name;
+  document.getElementById('os-en-desc').textContent   = t.os_en_desc;
+  document.getElementById('err-langue-os').textContent = t.err_os;
+  document.getElementById('s1-kbd-title').textContent = t.s1_kbd_title;
+  document.getElementById('s1-kbd-sub').textContent   = t.s1_kbd_sub;
+  document.getElementById('kbd-fr-name').textContent  = t.kbd_fr_name;
+  document.getElementById('kbd-fr-desc').textContent  = t.kbd_fr_desc;
+  document.getElementById('kbd-en-name').textContent  = t.kbd_en_name;
+  document.getElementById('kbd-en-desc').textContent  = t.kbd_en_desc;
+  document.getElementById('err-langue-clavier').textContent = t.err_kbd;
+
+  // Step 1 — fond
+  document.getElementById('s1-fond-title').textContent  = t.s1_fond_title;
+  document.getElementById('s1-fond-sub').textContent    = t.s1_fond_sub;
+  document.getElementById('fond-oui-name').textContent  = t.fond_oui_name;
+  document.getElementById('fond-oui-desc').textContent  = t.fond_oui_desc;
+  document.getElementById('fond-later-name').textContent = t.fond_later_name;
+  document.getElementById('fond-later-desc').textContent = t.fond_later_desc;
+  document.getElementById('fond-info-title').textContent = t.fond_info_title;
+  document.getElementById('fond-info-body').textContent  = t.fond_info_body;
+  document.getElementById('err1b').textContent = t.err1b;
+  document.getElementById('btn-prev1').textContent = t.btn_prev;
+  document.getElementById('btn-next1').textContent = t.btn_next;
+
+  // Step 2
+  document.getElementById('s2-title').textContent       = t.s2_title;
+  document.getElementById('s2-sub').textContent         = t.s2_sub;
+  document.getElementById('s2-other-title').textContent = t.s2_other_title;
+  document.getElementById('f-autre').placeholder        = t.f_autre_ph;
+  document.getElementById('p-casque').textContent  = t.p_casque;
+  document.getElementById('p-webcam').textContent  = t.p_webcam;
+  document.getElementById('p-dock').textContent    = t.p_dock;
+  document.getElementById('p-ecran').textContent   = t.p_ecran;
+  document.getElementById('p-clavier').textContent = t.p_clavier;
+  document.getElementById('p-souris').textContent  = t.p_souris;
+  document.getElementById('btn-prev2').textContent = t.btn_prev;
+  document.getElementById('btn-next2').textContent = t.btn_summary;
+
+  // Step 3 — résumé
+  document.getElementById('summ-sub').textContent    = t.summ_sub;
+  document.getElementById('sl-employe').textContent  = t.sl_employe;
+  document.getElementById('sl-config').textContent   = t.sl_config;
+  document.getElementById('sl-os').textContent       = t.sl_os;
+  document.getElementById('sl-kbd').textContent      = t.sl_kbd;
+  document.getElementById('sl-fond').textContent     = t.sl_fond;
+  document.getElementById('sl-periph').textContent   = t.sl_periph;
+  document.getElementById('sl-autre').textContent    = t.sl_autre;
+  document.getElementById('btn-prev3').textContent   = t.btn_modify;
+  document.getElementById('btn-submit').textContent  = t.btn_submit;
+  document.getElementById('sending-msg').innerHTML   = '<span class="spinner"></span>' + t.sending;
+}
+
+// ─── Sélection de langue ────────────────────────────────────────────────────
+function setLang(lang) {
+  state.lang = lang;
+  applyTranslations();
+  document.getElementById('progress-wrap').style.display = 'block';
+  showStep(0);
+}
+
+// ─── Navigation ─────────────────────────────────────────────────────────────
+const stepProgIdx = { 0: 0, 1: 1, 2: 2, 3: 3 };
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('step' + n);
+  el.classList.add('active', 'fade-in');
+  setTimeout(() => el.classList.remove('fade-in'), 300);
+
+  const progIdx = stepProgIdx[n] ?? 0;
+  for (let i = 0; i < 3; i++) {
+    const seg = document.getElementById('seg' + i);
+    seg.classList.remove('active', 'done');
+    if (i < progIdx) seg.classList.add('done');
+    else if (i === progIdx) seg.classList.add('active');
+  }
+  const t = T[state.lang];
+  document.getElementById('prog-label').textContent = n <= 3 ? (t.prog[n] || '') : '';
+  if (n === 4) document.getElementById('progress-wrap').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goPrev(step) {
+  if (step === 3 && state.fond === 'Plus tard') { showStep(1); return; }
+  if (step === 1) { showStep(0); return; }
+  showStep(step - 1);
+}
+
+function goNext(step) {
+  const t = T[state.lang];
+  if (step === 0) {
+    const vals = ['f-prenom','f-nom','f-email'].map(id => document.getElementById(id).value.trim());
+    if (vals.some(v => !v)) { show('err0'); return; }
+    hide('err0');
+  }
+  if (step === 1) {
+    if (!state.config)         { show('err1'); return; }            hide('err1');
+    if (!state.langue_os)      { show('err-langue-os'); return; }   hide('err-langue-os');
+    if (!state.langue_clavier) { show('err-langue-clavier'); return; } hide('err-langue-clavier');
+    if (!state.fond)           { show('err1b'); return; }           hide('err1b');
+    if (state.fond === 'Oui')       { showStep(2); return; }
+    if (state.fond === 'Plus tard') { state.periph = []; buildSummary(); showStep(3); return; }
+  }
+  if (step === 2) buildSummary();
+  showStep(step + 1);
+}
+
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+// ─── Sélections ─────────────────────────────────────────────────────────────
+function selectConfig(el) {
+  document.querySelectorAll('.config-choice').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.config = el.dataset.val;
+  const ls = document.getElementById('lang-section');
+  ls.classList.add('visible', 'fade-in');
+  setTimeout(() => ls.classList.remove('fade-in'), 300);
+}
+
+function selectLangOS(el) {
+  document.querySelectorAll('[data-group="langue-os"]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.langue_os = el.dataset.val;
+}
+
+function selectLangClavier(el) {
+  document.querySelectorAll('[data-group="langue-clavier"]').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.langue_clavier = el.dataset.val;
+}
+
+function selectFond(el) {
+  document.querySelectorAll('.fond-choice').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.fond = el.dataset.val;
+}
+
+function toggleCheck(el) {
+  const val = el.dataset.val;
+  el.classList.toggle('checked');
+  if (el.classList.contains('checked')) {
+    if (!state.periph.includes(val)) state.periph.push(val);
+  } else {
+    state.periph = state.periph.filter(v => v !== val);
+  }
+}
+
+// ─── Résumé ──────────────────────────────────────────────────────────────────
+function buildSummary() {
+  const t      = T[state.lang];
+  const prenom = document.getElementById('f-prenom').value.trim();
+  const nom    = document.getElementById('f-nom').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  const autre  = document.getElementById('f-autre').value.trim();
+
+  document.getElementById('summ-name').textContent       = t.merci + prenom + ' !';
+  document.getElementById('s-nom').textContent           = prenom + ' ' + nom;
+  document.getElementById('s-email').textContent         = email;
+  document.getElementById('s-config').textContent        = state.config         || '—';
+  document.getElementById('s-langue-os').textContent     = state.langue_os      || '—';
+  document.getElementById('s-langue-clavier').textContent= state.langue_clavier || '—';
+  document.getElementById('s-fond').textContent          = state.fond           || '—';
+
+  const periphWrap = document.getElementById('s-periph-wrap');
+  if (state.fond === 'Oui') {
+    periphWrap.style.display = 'block';
+    document.getElementById('s-periph').innerHTML = state.periph.length
+      ? state.periph.map(p => '<span class="tag">' + p + '</span>').join('')
+      : '<span style="font-size:0.8125rem;color:var(--text-muted)">' + t.none_selected + '</span>';
+  } else {
+    periphWrap.style.display = 'none';
+  }
+
+  if (autre) {
+    document.getElementById('s-autre-wrap').style.display = 'block';
+    document.getElementById('s-autre').textContent = autre;
+  } else {
+    document.getElementById('s-autre-wrap').style.display = 'none';
+  }
+}
+
+// ─── Soumission ──────────────────────────────────────────────────────────────
+async function submitForm() {
+  const t         = T[state.lang];
+  const btnSubmit = document.getElementById('btn-submit');
+  const sendingMsg= document.getElementById('sending-msg');
+  const errSubmit = document.getElementById('err-submit');
+
+  const payload = {
+    prenom:           document.getElementById('f-prenom').value.trim(),
+    nom:              document.getElementById('f-nom').value.trim(),
+    email:            document.getElementById('f-email').value.trim(),
+    langue_interface: state.lang === 'fr' ? 'Français' : 'English',
+    configuration:    state.config,
+    langue_os:        state.langue_os,
+    langue_clavier:   state.langue_clavier,
+    fond_depenses:    state.fond,
+    peripheriques:    state.periph.join(', '),
+    autre:            document.getElementById('f-autre').value.trim(),
+    date_soumission:  new Date().toISOString(),
+    reference:        'TI-EDUC-' + Date.now().toString(36).toUpperCase()
+  };
+
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = '...';
+  sendingMsg.style.display = 'block';
+  errSubmit.style.display = 'none';
+
+  try {
+    const response = await fetch(SUBMIT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    document.getElementById('conf-title').textContent = t.conf_title;
+    document.getElementById('conf-body').innerHTML    = t.conf_body;
+    document.getElementById('s-ref').textContent      = t.ref_label + payload.reference;
+    showStep(4);
+  } catch (error) {
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = t.btn_submit;
+    sendingMsg.style.display = 'none';
+    errSubmit.textContent = t.err_submit;
+    errSubmit.style.display = 'block';
+    console.error('Erreur soumission:', error);
+  }
+}
+</script>
+</body>
+</html>
